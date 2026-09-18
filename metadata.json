@@ -1,0 +1,6 @@
+{
+  "name": "Arrow Escape",
+  "description": "A minimalist directional arrow puzzle game where you untangle and clear boards across 50 progressive levels.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
