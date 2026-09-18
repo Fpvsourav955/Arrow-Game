@@ -207,6 +207,67 @@ class SoundEngine {
       osc.stop(noteTime + 0.19);
     });
   }
+
+  public playCombo(comboMultiplier: number) {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    // Pentatonic scale base frequencies for combo progression: C5, D5, E5, G5, A5, C6
+    const baseFreqs = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5];
+    const noteIdx = Math.min(comboMultiplier - 1, baseFreqs.length - 1);
+    const freq = baseFreqs[Math.max(0, noteIdx)];
+
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(freq, now);
+    osc1.frequency.exponentialRampToValueAtTime(freq * 1.05, now + 0.12);
+
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(freq * 1.5, now);
+    osc2.frequency.exponentialRampToValueAtTime(freq * 1.52, now + 0.12);
+
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.linearRampToValueAtTime(0.16, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + 0.23);
+    osc2.stop(now + 0.23);
+  }
+
+  public playRadar() {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, now);
+    osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+
+    gain.gain.setValueAtTime(0.02, now);
+    gain.gain.linearRampToValueAtTime(0.12, now + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.26);
+  }
 }
 
 export const soundEngine = new SoundEngine();

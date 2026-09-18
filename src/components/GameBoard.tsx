@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ArrowItem, LevelData } from '../types';
 import { ArrowView } from './ArrowView';
+import { MagnifierLoupe } from './MagnifierLoupe';
+import { LaunchSparkles, SparkleBurst } from './LaunchSparkles';
 
 interface GameBoardProps {
   level: LevelData;
@@ -8,6 +10,9 @@ interface GameBoardProps {
   exitingArrowIds: Set<string>;
   blockedArrowId: string | null;
   hintedArrowId: string | null;
+  radarArrowIds?: Set<string>;
+  isMagnifierActive?: boolean;
+  sparkleBursts?: SparkleBurst[];
   onArrowTap: (arrow: ArrowItem) => void;
   disabled: boolean;
   theme?: 'clean' | 'warm';
@@ -19,19 +24,24 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   exitingArrowIds,
   blockedArrowId,
   hintedArrowId,
+  radarArrowIds = new Set(),
+  isMagnifierActive = false,
+  sparkleBursts = [],
   onArrowTap,
   disabled,
   theme = 'clean',
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const boardAreaRef = useRef<HTMLDivElement | null>(null);
   const [boardWidth, setBoardWidth] = useState<number>(320);
+  const [pointerPos, setPointerPos] = useState<{ x: number; y: number } | null>(null);
 
   // Measure container and adapt cellSize
   useEffect(() => {
     const updateSize = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      // Cap board size for comfortable portrait mobile presentation
+      // Cap board size for comfortable portrait presentation
       const available = Math.min(rect.width - 24, 460);
       setBoardWidth(Math.max(260, available));
     };
@@ -45,6 +55,22 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   const cellSize = Math.floor(boardWidth / maxDimension);
   const actualBoardWidth = cellSize * level.cols;
   const actualBoardHeight = cellSize * level.rows;
+
+  // Track pointer for Magnifier Loupe
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isMagnifierActive || !boardAreaRef.current) return;
+    const rect = boardAreaRef.current.getBoundingClientRect();
+    setPointerPos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  const handlePointerLeave = () => {
+    if (isMagnifierActive) {
+      setPointerPos(null);
+    }
+  };
 
   return (
     <div
@@ -64,12 +90,16 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           height: `${actualBoardHeight + 24}px`,
         }}
       >
-        {/* Subtle inner grid canvas / dot matrix */}
+        {/* Inner grid canvas */}
         <div
+          ref={boardAreaRef}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={handlePointerLeave}
           className="relative w-full h-full overflow-visible rounded-2xl flex items-center justify-center"
           style={{
             width: `${actualBoardWidth}px`,
             height: `${actualBoardHeight}px`,
+            cursor: isMagnifierActive ? 'crosshair' : 'default',
           }}
         >
           {/* Subtle Grid Dots */}
@@ -92,6 +122,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({
             )}
           </div>
 
+          {/* Launch Sparkle Bursts */}
+          <LaunchSparkles bursts={sparkleBursts} />
+
           {/* Active & Exiting Arrows */}
           {activeArrows.map((arrow) => (
             <ArrowView
@@ -101,10 +134,27 @@ export const GameBoard: React.FC<GameBoardProps> = ({
               isHinted={hintedArrowId === arrow.id}
               isBlocked={blockedArrowId === arrow.id}
               isExiting={exitingArrowIds.has(arrow.id)}
+              isRadarHighlighted={radarArrowIds.has(arrow.id)}
               onClick={() => onArrowTap(arrow)}
               disabled={disabled || exitingArrowIds.has(arrow.id)}
             />
           ))}
+
+          {/* Floating Magnifier Loupe when active */}
+          {isMagnifierActive && (
+            <MagnifierLoupe
+              level={level}
+              activeArrows={activeArrows}
+              cellSize={cellSize}
+              boardWidth={actualBoardWidth}
+              boardHeight={actualBoardHeight}
+              pointerPos={pointerPos}
+              onArrowTap={onArrowTap}
+              hintedArrowId={hintedArrowId}
+              blockedArrowId={blockedArrowId}
+              radarArrowIds={radarArrowIds}
+            />
+          )}
         </div>
       </div>
     </div>

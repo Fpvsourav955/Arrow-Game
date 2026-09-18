@@ -47,6 +47,7 @@ export interface GameSettings {
   soundEnabled: boolean;
   vibrationEnabled: boolean;
   boardTheme: 'clean' | 'warm';
+  casualMode?: boolean;
 }
 
 export type ScreenState = 'HOME' | 'LEVEL_SELECT' | 'GAME';

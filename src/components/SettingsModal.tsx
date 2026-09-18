@@ -141,6 +141,35 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
           </div>
 
+          {/* Casual / Relaxed Mode (Infinite Lives) */}
+          <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
+                <span className="text-base font-black">∞</span>
+              </div>
+              <div>
+                <div className="font-semibold text-sm text-slate-800">Relaxed Mode</div>
+                <div className="text-xs text-slate-500">Infinite hearts (no fail state)</div>
+              </div>
+            </div>
+            <button
+              id="toggle-casual-mode-button"
+              onClick={() => {
+                soundEngine.playButtonClick();
+                onUpdateSettings({ ...settings, casualMode: !settings.casualMode });
+              }}
+              className={`w-12 h-7 flex items-center rounded-full p-1 transition-colors ${
+                settings.casualMode ? 'bg-emerald-600' : 'bg-slate-300'
+              }`}
+            >
+              <div
+                className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform ${
+                  settings.casualMode ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
           {/* Reset Progress */}
           <div className="pt-2">
             {!confirmReset ? (

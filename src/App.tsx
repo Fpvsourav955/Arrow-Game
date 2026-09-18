@@ -97,6 +97,7 @@ export default function App() {
             onNextLevel={handleNextLevel}
             onOpenSettings={() => setIsSettingsOpen(true)}
             onUpdateProgress={handleUpdateProgress}
+            onUpdateSettings={handleUpdateSettings}
           />
         )}
 
